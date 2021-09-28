@@ -17,8 +17,12 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 		<salesforce:basic-connection username="chandanavelagam@apisero.com" password="Chandana@123" securityToken="69va4jJnHR9MoMjxU2Zv1Ivs" />
 	</salesforce:sfdc-config>
 	<flow name="awsToSalesforce" doc:id="06df51c2-5cc3-477c-ac45-9c2bcfc134cb" >
-		<http:listener doc:name="Listener" doc:id="1a25053c-8976-4f4e-9bff-18136d47cdf0" config-ref="HTTP_Listener_config" path="/getAws" />
-		<s3:get-object doc:name="Copy_of_Get object" doc:id="78cefaf6-0c35-496a-90e5-23570864571e" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
+		<scheduler doc:name="Scheduler" doc:id="fd6cbd5c-251a-4650-a261-ac5c3876664f">
+			<scheduling-strategy>
+				<cron expression="0 0/30 0/21 ? * * *" timeZone="UTC" />
+			</scheduling-strategy>
+		</scheduler>
+		<s3:get-object doc:name="get_records_from_AWS" doc:id="78cefaf6-0c35-496a-90e5-23570864571e" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
 		<ee:transform doc:name="Transform Message" doc:id="ce93916b-2f19-4b2e-b8b7-895230dd5597" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -48,42 +52,5 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="43399bfa-2af4-4df1-b578-8738979f4245" message="#[payload]"/>
-	</flow>
-	<flow name="Copy_of_awsToSalesforce" doc:id="7dae2ca2-0e67-416a-92a8-a4f72146941b" >
-		<scheduler doc:name="Scheduler" doc:id="fd6cbd5c-251a-4650-a261-ac5c3876664f" >
-			<scheduling-strategy >
-				<cron expression="0 0/29 0/18 ? * * *" timeZone="UTC" />
-			</scheduling-strategy>
-		</scheduler>
-		<s3:get-object doc:name="Copy_of_Copy_of_Get object" doc:id="08d89b78-5293-41ad-8b19-ac6ddb2b6525" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="4d429fe2-3f64-47b4-92af-dec46007669a" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	Name: ((payload01."Account name" default "") ++ payload01."First name") ++ payload01."Last name",
-	BillingCity: payload01."Billing city",
-	BillingState: payload01."Billing state/province",
-	BillingPostalCode: payload01."Billing zip/postal code",
-	BillingCountry: payload01."Billing country",
-	ShippingCity: payload01."Shipping city",
-	ShippingState: payload01."Shipping state/province",
-	ShippingPostalCode: payload01."Shipping zip/postal code",
-	ShippingCountry: payload01."Shipping country",
-	Phone: payload01.Phone
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<salesforce:create type="Account" doc:name="Copy_of_Create" doc:id="734b79ff-20b2-4dfa-b310-ba32da2be3a6" config-ref="Salesforce_Config" />
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="79f98c25-d082-4b36-adee-18f5afdbbb24" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="9f1dc548-4c97-4caa-9cf8-fb50c8827633" message="#[payload]" />
 	</flow>
 </mule>
