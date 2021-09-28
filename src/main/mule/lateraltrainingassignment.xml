@@ -52,7 +52,7 @@ payload]]></ee:set-payload>
 	<flow name="Copy_of_awsToSalesforce" doc:id="7dae2ca2-0e67-416a-92a8-a4f72146941b" >
 		<scheduler doc:name="Scheduler" doc:id="fd6cbd5c-251a-4650-a261-ac5c3876664f" >
 			<scheduling-strategy >
-				<cron expression="52 22 * * *" timeZone="Asia/Kolkata" />
+				<cron expression="15 23 * * *" timeZone="Asia/Kolkata" />
 			</scheduling-strategy>
 		</scheduler>
 		<s3:get-object doc:name="Copy_of_Copy_of_Get object" doc:id="08d89b78-5293-41ad-8b19-ac6ddb2b6525" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
