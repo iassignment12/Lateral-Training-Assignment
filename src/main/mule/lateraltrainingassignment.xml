@@ -1,25 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:s3="http://www.mulesoft.org/schema/mule/s3"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1c526e29-4139-4824-82c5-a2d3828cd710" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
-	<flow name="lateraltrainingassignmentFlow" doc:id="498ae9aa-4bd6-47bf-904c-8b938522e822" >
-		<http:listener doc:name="Listener" doc:id="7862c01c-4fbc-4d08-9388-05008ea3d518" config-ref="HTTP_Listener_config" path="/hello"/>
-		<ee:transform doc:name="Transform Message" doc:id="8332e50f-c65f-476f-a645-f77f56285158" >
+	<s3:config name="Amazon_S3_Configuration" doc:name="Amazon S3 Configuration" doc:id="4e4fc123-406c-4ad2-a5de-38919a6ffb6d" >
+		<s3:basic-connection accessKey="AKIAV3BU67LF6SIAIGUB" secretKey="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" region="US_EAST_2"/>
+	</s3:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="ecb4bf1c-0fb9-4c23-8888-684504ccb96b" >
+		<salesforce:basic-connection username="chandanavelagam@apisero.com" password="Chandana@123" securityToken="69va4jJnHR9MoMjxU2Zv1Ivs" />
+	</salesforce:sfdc-config>
+	<flow name="awsToSalesforce" doc:id="06df51c2-5cc3-477c-ac45-9c2bcfc134cb" >
+		<http:listener doc:name="Listener" doc:id="1a25053c-8976-4f4e-9bff-18136d47cdf0" config-ref="HTTP_Listener_config" path="/getAws"/>
+		<s3:get-object doc:name="Copy_of_Get object" doc:id="78cefaf6-0c35-496a-90e5-23570864571e" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="ce93916b-2f19-4b2e-b8b7-895230dd5597" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	message : "Hello! Working fine so far"
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: ((payload01."Account name" default "") ++ payload01."First name") ++ payload01."Last name",
+	BillingCity: payload01."Billing city",
+	BillingState: payload01."Billing state/province",
+	BillingPostalCode: payload01."Billing zip/postal code",
+	BillingCountry: payload01."Billing country",
+	ShippingCity: payload01."Shipping city",
+	ShippingState: payload01."Shipping state/province",
+	ShippingPostalCode: payload01."Shipping zip/postal code",
+	ShippingCountry: payload01."Shipping country",
+	Phone: payload01.Phone
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="1a90f154-2d8d-4117-9046-ea416c8a4c99" message="#[payload]"/>
+		<salesforce:create type="Account" doc:name="Create" doc:id="c96acf72-0d96-4150-9f3b-a11f7e2f3ebf" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="29b94068-8e95-41c0-97d5-1c62ec46bf7f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="43399bfa-2af4-4df1-b578-8738979f4245" message="#[payload]"/>
 	</flow>
 </mule>

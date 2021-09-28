@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Accountname" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="awsdatajson" format="json">
+      <types:shape format="weave" example="examples/accounts.json"><![CDATA[%dw 2.0
+
+type awsdatajson = Array<{|  "Account name": String,   "First name": String,   "Last name": String,   Phone: String,   "Billing city": String,   "Billing state/province": String,   "Billing country": String,   "Billing zip/postal code": String,   "Shipping city": String,   "Shipping state/province": String,   "Shipping country": String,   "Shipping zip/postal code": String|}> {"example": "[{\\\"Account name\\\":\\\"ChandanaVelagam\\\",\\\"First name\\\":\\\"Chandana\\\",\\\"Last name\\\":\\\"Velagam\\\",\\\"Phone\\\":\\\"1234567890\\\",\\\"Billing city\\\":\\\"Guntur\\\",\\\"Billing state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Billing country\\\":\\\"India\\\",\\\"Billing zip\\/postal code\\\":\\\"522004\\\",\\\"Shipping city\\\":\\\"Guntur\\\",\\\"Shipping state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Shipping country\\\":\\\"India\\\",\\\"Shipping zip\\/postal code\\\":\\\"522001\\\"},{\\\"Account name\\\":\\\"Testval0\\\",\\\"First name\\\":\\\"Testval1\\\",\\\"Last name\\\":\\\"Testval2\\\",\\\"Phone\\\":\\\"Testval\\\",\\\"Billing city\\\":\\\"Testval\\\",\\\"Billing state\\/province\\\":\\\"Testval\\\",\\\"Billing country\\\":\\\"Testval\\\",\\\"Billing zip\\/postal code\\\":\\\"Testval\\\",\\\"Shipping city\\\":\\\"Testval\\\",\\\"Shipping state\\/province\\\":\\\"Testval\\\",\\\"Shipping country\\\":\\\"Testval\\\",\\\"Shipping zip\\/postal code\\\":\\\"Testval\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="sucess_status" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="succes" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#abd86c73-6c00-422c-90b8-0da5fc0eb2c2">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="awsdatajson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#ce93916b-2f19-4b2e-b8b7-895230dd5597">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="awsdatajson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#26b4ca60-e321-423b-bbd6-e5e09d2de53f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="sucess_status"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#3070d618-898e-4685-9ed2-b393ab2bd828">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="sucess_status"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#17124efb-adb2-4ac6-959a-71cc21cd38ac">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="succes"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

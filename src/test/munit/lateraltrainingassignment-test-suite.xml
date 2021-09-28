@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<munit:config name="lateraltrainingassignment-test-suite.xml" />
+	<munit:test name="lateraltrainingassignment-test-suite-awsToSalesforceTest" doc:id="bfd10f7d-ca2b-4615-b90d-7a4d0356f023" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to awsToSalesforce" doc:id="6207d1e8-827d-438e-ac10-97686a199e3a" name="awsToSalesforce"/>
+		</munit:execution>
+		<munit:validation>
+			<ee:transform doc:name="Transform Message" doc:id="17124efb-adb2-4ac6-959a-71cc21cd38ac" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.successful as String]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="3feff050-6cb0-4266-91f6-dc23b4b3bc5f" actual="#[payload]" expected="#['true']"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

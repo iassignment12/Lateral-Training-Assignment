@@ -1,0 +1,36 @@
+{
+  "id": {
+    
+  },
+  "items": [
+    {
+      "exception": {
+        
+      },
+      "id": {
+        
+      },
+      "message": "45",
+      "payload": {
+        
+      },
+      "statusCode": "quam",
+      "successful": false
+    },
+    {
+      "exception": {
+        
+      },
+      "id": {
+        
+      },
+      "message": "21",
+      "payload": {
+        
+      },
+      "statusCode": "in",
+      "successful": true
+    }
+  ],
+  "successful": false
+}
