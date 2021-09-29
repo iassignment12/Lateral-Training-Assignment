@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 	<flow name="awsToSalesforce" doc:id="06df51c2-5cc3-477c-ac45-9c2bcfc134cb" >
 		<scheduler doc:name="Scheduler" doc:id="fd6cbd5c-251a-4650-a261-ac5c3876664f">
 			<scheduling-strategy>
-				<cron expression="0 0/10 0/03 ? * * *" timeZone="UTC" />
+				<cron expression="0 30 21 ? * * *" timeZone="UTC" />
 			</scheduling-strategy>
 		</scheduler>
 		<s3:get-object doc:name="get_records_from_AWS" doc:id="78cefaf6-0c35-496a-90e5-23570864571e" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" />
