@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xsi:schemaLocation="
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
-		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<munit:config name="lateraltrainingassignment-test-suite.xml" />
 	<munit:test name="lateraltrainingassignment-test-suite-Copy_of_awsToSalesforceTest" doc:id="d73bed41-a262-414b-aa2e-19b3b27f3de5" description="Test">
 		<munit:execution >
-			<flow-ref doc:name="Flow-ref to Copy_of_awsToSalesforce" doc:id="736d4e10-1571-446d-ada4-8a740012672b" name="Copy_of_awsToSalesforce"/>
+			<flow-ref doc:name="Flow-ref to Copy_of_awsToSalesforce" doc:id="736d4e10-1571-446d-ada4-8a740012672b" name="awsToSalesforce"/>
 		</munit:execution>
+		<munit:validation >
+			<ee:transform doc:name="Transform Message" doc:id="6676af82-3169-4099-9c43-0c12f18cb962" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.successful]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="b6c82bba-4616-422f-ac1c-bc9b45038571" actual="#[payload]" expected="#[true]"/>
+		</munit:validation>
 	</munit:test>
 
 

@@ -16,14 +16,14 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5533baba-8c34-4be3-909a-de659eeceb73" >
 		<salesforce:basic-connection username="chandanavelagam@apisero.com" password="Chandana@123" securityToken="RVHu9EvTw3pzrZYuTYbFthJS7" />
 	</salesforce:sfdc-config>
-	<flow name="Copy_of_awsToSalesforce" doc:id="c3bb6db1-a603-4491-b163-b19909ca29c1" >
+	<flow name="awsToSalesforce" doc:id="c3bb6db1-a603-4491-b163-b19909ca29c1" >
 		<scheduler doc:name="Scheduled every night at 3:00" doc:id="7bea0cce-443d-4345-b8bb-37eb110a80f8" >
 			<scheduling-strategy >
 				<cron expression="0 30 21 ? * * *" timeZone="UTC" />
 			</scheduling-strategy>
 		</scheduler>
 		<s3:get-object doc:id="d89c9f66-577e-41c9-9a1a-55a37e46c8c7" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" doc:name="AWS" />
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="cf1c8d21-0429-44f2-b1cb-a78e0de516ec" >
+		<ee:transform doc:name="AWS to Salesforce" doc:id="cf1c8d21-0429-44f2-b1cb-a78e0de516ec" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/java
@@ -51,6 +51,6 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="e6ec5aa9-d204-4b68-ba28-09cdedebbee0" message="#[payload]" />
+		<logger level="INFO" doc:name="Logger" doc:id="e6ec5aa9-d204-4b68-ba28-09cdedebbee0" message="#[payload]" />
 	</flow>
 </mule>

@@ -8,6 +8,10 @@ type accounts = Array<{|  "Account name": String,   "First name": String,   "Las
 
 ]]></types:shape>
     </types:type>
+    <types:type name="success_status" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#cf1c8d21-0429-44f2-b1cb-a78e0de516ec">
     <types:processor-declaration>
@@ -17,6 +21,20 @@ type accounts = Array<{|  "Account name": String,   "First name": String,   "Las
           <types:attributes type="accounts"/>
         </types:message>
       </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#6676af82-3169-4099-9c43-0c12f18cb962">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="success_status"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="success_status"/>
+        </types:message>
+      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
