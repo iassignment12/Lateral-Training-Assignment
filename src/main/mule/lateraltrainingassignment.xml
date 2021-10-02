@@ -10,6 +10,12 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="679163f2-b9dd-47fe-a58c-fae25c98c44f" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<s3:config name="Amazon_S3_Configuration" doc:name="Amazon S3 Configuration" doc:id="fa326250-2d2f-4dd2-b294-b2a236e997f4" >
+		<s3:basic-connection accessKey="AKIAV3BU67LF3YUNJPV6" secretKey="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" region="US_EAST_2" />
+	</s3:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5533baba-8c34-4be3-909a-de659eeceb73" >
+		<salesforce:basic-connection username="chandanavelagam@apisero.com" password="Chandana@123" securityToken="RVHu9EvTw3pzrZYuTYbFthJS7" />
+	</salesforce:sfdc-config>
 	<flow name="Copy_of_awsToSalesforce" doc:id="c3bb6db1-a603-4491-b163-b19909ca29c1" >
 		<scheduler doc:name="Scheduled every night at 3:00" doc:id="7bea0cce-443d-4345-b8bb-37eb110a80f8" >
 			<scheduling-strategy >
@@ -36,8 +42,8 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<salesforce:create type="Account" doc:id="60724f21-f18a-4684-8643-10408567b241" config-ref="Salesforce_Config" doc:name="Copy_of_Add data to Salesforce" />
-		<ee:transform doc:name="Copy_of_to JSON" doc:id="b342c422-b3d7-42f5-b1ce-0bbdefc92686" >
+		<salesforce:create doc:id="60724f21-f18a-4684-8643-10408567b241" config-ref="Salesforce_Config" doc:name="Add data to Salesforce" type="Account"/>
+		<ee:transform doc:name="to JSON" doc:id="b342c422-b3d7-42f5-b1ce-0bbdefc92686" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json

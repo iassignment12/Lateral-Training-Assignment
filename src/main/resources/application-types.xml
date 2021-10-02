@@ -13,6 +13,7 @@ type accounts = Array<{|  "Account name": String,   "First name": String,   "Las
     <types:processor-declaration>
       <types:input-event>
         <types:message>
+          <types:payload type="accounts"/>
           <types:attributes type="accounts"/>
         </types:message>
       </types:input-event>
