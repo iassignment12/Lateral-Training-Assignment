@@ -1,4 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
-  <types:catalog/>
+  <types:catalog>
+    <types:type name="accounts" format="json">
+      <types:shape format="weave" example="examples/accounts.json"><![CDATA[%dw 2.0
+
+type accounts = Array<{|  "Account name": String,   "First name": String,   "Last name": String,   Phone: String,   "Billing city": String,   "Billing state/province": String,   "Billing country": String,   "Billing zip/postal code": String,   "Shipping city": String,   "Shipping state/province": String,   "Shipping country": String,   "Shipping zip/postal code": String|}> {"example": "[{\\\"Account name\\\":\\\"ChandanaVelagam\\\",\\\"First name\\\":\\\"Chandana\\\",\\\"Last name\\\":\\\"Velagam\\\",\\\"Phone\\\":\\\"1234567890\\\",\\\"Billing city\\\":\\\"Guntur\\\",\\\"Billing state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Billing country\\\":\\\"India\\\",\\\"Billing zip\\/postal code\\\":\\\"522004\\\",\\\"Shipping city\\\":\\\"Guntur\\\",\\\"Shipping state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Shipping country\\\":\\\"India\\\",\\\"Shipping zip\\/postal code\\\":\\\"522001\\\"},{\\\"Account name\\\":\\\"Testval0\\\",\\\"First name\\\":\\\"Testval1\\\",\\\"Last name\\\":\\\"Testval2\\\",\\\"Phone\\\":\\\"Testval\\\",\\\"Billing city\\\":\\\"Testval\\\",\\\"Billing state\\/province\\\":\\\"Testval\\\",\\\"Billing country\\\":\\\"Testval\\\",\\\"Billing zip\\/postal code\\\":\\\"Testval\\\",\\\"Shipping city\\\":\\\"Testval\\\",\\\"Shipping state\\/province\\\":\\\"Testval\\\",\\\"Shipping country\\\":\\\"Testval\\\",\\\"Shipping zip\\/postal code\\\":\\\"Testval\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#cf1c8d21-0429-44f2-b1cb-a78e0de516ec">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:attributes type="accounts"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>

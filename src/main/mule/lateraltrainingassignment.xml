@@ -1,25 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:s3="http://www.mulesoft.org/schema/mule/s3"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="679163f2-b9dd-47fe-a58c-fae25c98c44f" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
-	<flow name="lateraltrainingassignmentFlow" doc:id="ad19975f-2d0c-4d3f-8cf9-1be25edb4dab" >
-		<http:listener doc:name="Listener" doc:id="53a81713-7b2e-4b69-b851-c4ecb8bb95bd" config-ref="HTTP_Listener_config" path="/hello"/>
-		<ee:transform doc:name="Transform Message" doc:id="6902ed3f-d921-4dbd-a0e4-78a0c0fd8e47" >
+	<flow name="Copy_of_awsToSalesforce" doc:id="c3bb6db1-a603-4491-b163-b19909ca29c1" >
+		<scheduler doc:name="Scheduled every night at 3:00" doc:id="7bea0cce-443d-4345-b8bb-37eb110a80f8" >
+			<scheduling-strategy >
+				<cron expression="0 30 21 ? * * *" timeZone="UTC" />
+			</scheduling-strategy>
+		</scheduler>
+		<s3:get-object doc:id="d89c9f66-577e-41c9-9a1a-55a37e46c8c7" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv" doc:name="AWS" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="cf1c8d21-0429-44f2-b1cb-a78e0de516ec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01."Account name",
+	BillingCity: payload01."Billing city",
+	BillingState: payload01."Billing state/province",
+	BillingPostalCode: payload01."Billing zip/postal code",
+	BillingCountry: payload01."Billing country",
+	ShippingCity: payload01."Shipping city",
+	ShippingState: payload01."Shipping state/province",
+	ShippingPostalCode: payload01."Shipping zip/postal code",
+	ShippingCountry: payload01."Shipping country",
+	Phone: payload01.Phone
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:id="60724f21-f18a-4684-8643-10408567b241" config-ref="Salesforce_Config" doc:name="Copy_of_Add data to Salesforce" />
+		<ee:transform doc:name="Copy_of_to JSON" doc:id="b342c422-b3d7-42f5-b1ce-0bbdefc92686" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	message : "Hi, Working cool so far!"
-}]]></ee:set-payload>
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="c7a3a6bf-4693-4c31-b5d4-5b1412d73fd0" message="#[payload]"/>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="e6ec5aa9-d204-4b68-ba28-09cdedebbee0" message="#[payload]" />
 	</flow>
 </mule>
