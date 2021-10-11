@@ -12,6 +12,9 @@
 		<munit:execution >
 			<flow-ref doc:name="Flow-ref to trainingassignmentFlow" doc:id="e5fa8d83-c3b9-4445-970d-eb336e971be8" name="trainingassignmentFlow"/>
 		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="80d75076-405e-450d-80a7-dc0a54255b85" actual="#[payload.successful]" expected="#[true]"/>
+		</munit:validation>
 	</munit:test>
 
 

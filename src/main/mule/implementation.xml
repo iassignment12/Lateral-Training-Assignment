@@ -122,22 +122,6 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger"
 			doc:id="6807011a-4f8b-4521-841e-41a530822832" message="#[payload]" />
 	</flow>
-	<flow name="implementationFlow" doc:id="06885521-9a70-46aa-b95a-1b871ba78127" >
-		<http:listener doc:name="Listener" doc:id="9880e0bc-2beb-49a8-b6f7-c70ca927634c" config-ref="HTTP_Listener_config" path="/try"/>
-		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="163e2abf-09fb-4ee5-8cb5-b536f3d37fc0" variableName="id"/>
-		<salesforce:delete doc:name="Delete" doc:id="0a7513c2-eedb-4535-bc47-316872e1469d" config-ref="Salesforce_Config">
-			<salesforce:ids ><![CDATA[#[vars.id]]]></salesforce:ids>
-		</salesforce:delete>
-		<ee:transform doc:name="Transform Message" doc:id="8ce5404e-14e8-4942-abd3-d1b7fb20ab8e" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="bc31fffd-5dc2-4369-bbcf-2812be808e89" message="payload"/>
-	</flow>
 	<flow name="updateUsers"
 		doc:id="9f34e1ab-b1c6-4223-9d06-323170b7ccc1">
 		<http:listener doc:name="Listener"
