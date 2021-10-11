@@ -1,0 +1,54 @@
+#%RAML 1.0
+title: lateral-assignment-project
+
+types:
+  order:
+    
+/orders:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              output : !include orderExamples.raml
+
+  /{ID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output : !include orderExamples.raml
+  post:
+    body:
+      application/json:
+        examples:
+          input: !include orderExamples.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Order added
+  
+  patch:
+    body:
+      application/json:
+        example:
+          output : !include orderExamples.raml
+      
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              message : Orders updated
+          
+
+            
+      
+          
+     
+        

@@ -1,0 +1,56 @@
+#%RAML 1.0
+title: users
+
+types:
+  order:
+    
+/users:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              output : !include userExamples.raml
+
+              
+  /{ID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output : !include userExamples.raml
+
+  post:
+    body:
+      application/json:
+        examples:
+          input: !include userExamples.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: User added
+  
+  patch:
+    body:
+      application/json:
+        example:
+          output : !include userExamples.raml
+      
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              message : Users updated
+          
+
+            
+      
+          
+     
+        

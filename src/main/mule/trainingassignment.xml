@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:s3="http://www.mulesoft.org/schema/mule/s3"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c2792626-93d5-4773-b55f-0ee0f8ff19c1" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<s3:config name="Amazon_S3_Configuration" doc:name="Amazon S3 Configuration" doc:id="eeb6e9fc-6bea-46bb-a105-90812f787d62" >
+		<s3:basic-connection accessKey="AKIAV3BU67LFXBJ5AYJA" secretKey="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" region="US_EAST_2" />
+	</s3:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="44df0622-4fac-4953-a294-54529fdcd922" >
+		<salesforce:basic-connection username="chandanavelagam@apisero.com" password="Chandana@123" securityToken="DncGyaxF5G99IxxTpjyZWaIL" />
+	</salesforce:sfdc-config>
+	<flow name="trainingassignmentFlow" doc:id="ce9ece0f-b91f-4659-82d4-e25d0e5afeb0" >
+		<scheduler doc:name="Scheduler" doc:id="da157bbb-35bc-4d48-afaf-adfdc1b69949" >
+			<scheduling-strategy >
+				<cron expression="0 30 21 ? * * *" timeZone="UTC"/>
+			</scheduling-strategy>
+		</scheduler>
+		<s3:get-object doc:name="Get data from AWS" doc:id="f01c9c5b-5374-489f-999b-5684017d09e2" config-ref="Amazon_S3_Configuration" bucketName="accounts-lateral-training-assignment" key="accounts.csv.csv"/>
+		<ee:transform doc:name="AWS to salesforce data modif" doc:id="378b4de3-6063-4048-a73f-c675137625aa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01."Account name",
+	BillingCity: payload01."Billing city",
+	BillingState: payload01."Billing state/province",
+	BillingPostalCode: payload01."Billing zip/postal code",
+	BillingCountry: payload01."Billing country",
+	ShippingCity: payload01."Shipping city",
+	ShippingState: payload01."Shipping state/province",
+	ShippingPostalCode: payload01."Shipping zip/postal code",
+	ShippingCountry: payload01."Shipping country",
+	Phone: payload01.Phone
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="Add accounts to salesforce" doc:id="c656db1b-0d0a-4cb9-a015-7c1b25c00695" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="288bf5c6-eadd-4c49-b6f3-009250236b6c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4b91bfa3-e643-4e6a-ac61-ea72b0e102b3" message="#[payload]"/>
+	</flow>
+</mule>
