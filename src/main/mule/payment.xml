@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="abc244ec-1eee-447d-b043-3e1d1052f25c" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<flow name="getProductsById" doc:id="0dd3b717-aa19-41a3-8e9b-3cef2a4f5498" >
+		<http:listener doc:name="Listener" doc:id="e31b1482-854b-4c97-aab5-63a41c1960f7" config-ref="HTTP_Listener_config" path="/getProductById" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="Set id" doc:id="25599248-b013-4cc8-bb5a-34c76500bea1" variableName="id" />
+		<salesforce:query doc:name="get Products from salesforce " doc:id="1e0af117-26e1-45b8-9ff2-8816da42eed3" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[SELECT Name, ProductCode, Price__c, stock__c from PRODUCT2]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="print only product matching id" doc:id="1cbc9701-e3bb-4898-83e7-811cc67fae9b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.ProductCode == vars.id)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTotalAmount" doc:id="0b10c089-70af-42a4-a112-04604a2b89f7" >
+		<http:listener doc:name="Listener" doc:id="7766ac1a-c857-4016-8304-a7ae68f29b1a" config-ref="HTTP_Listener_config" path="/getTotalAmountFromProducts" />
+		<ee:transform doc:name="Transform Message" doc:id="dfc4022d-da0a-49f8-8abe-db180afe3703" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Products__c joinBy("")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="9dbe10b2-ed74-4d01-905e-1de3af8fbd6e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload splitBy(",")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[0]" doc:name="Initialize amount to o" doc:id="f048ef8b-623e-4b26-b4f4-aef0b2652783" variableName="Amount" />
+		<foreach doc:name="For Each" doc:id="1c6c58d8-f3e1-479a-865a-a6b4f4596ec7" >
+			<set-variable value="#[payload]" doc:name="Set id" doc:id="f997f906-cce5-4386-acbc-dd8031c32869" variableName="id" />
+			<http:request method="GET" doc:name="Get Product by Id request " doc:id="e39e09e9-74b1-41bd-a9fb-bc1750008821" path="/getProductById" responseTimeout="100000" config-ref="HTTP_Request_configuration">
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.id
+}]]]></http:query-params>
+			</http:request>
+			<ee:transform doc:name="Transform Message" doc:id="960be136-6128-450c-9b0b-873ea88350f6" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[payload.Price__c[0] as Number]" doc:name="price" doc:id="32b30a0e-9fe8-4ec0-a9eb-5ef79a2aea8d" variableName="try" mimeType="application/json" />
+			<ee:transform doc:name="sum" doc:id="5784ef18-8df3-4cae-a7da-a6e8222a4a65" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.Amount + vars.try]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[payload]" doc:name="Set Variable" doc:id="183da24c-d69a-4820-a1dd-7431a9a250cc" variableName="Amount" />
+			<logger level="INFO" doc:name="Logger" doc:id="937bdd2d-6d75-4a8f-aea6-3db7b98e90ec" message="#[payload]" />
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="2ac54c24-da61-4e98-b248-887be0cc66d9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.Amount]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9e81af6f-f6a0-4be4-9332-7a0a26134a14" message="#[vars.Amount]" />
+	</flow>
+	<flow name="checkout" doc:id="49a4bb0c-a2f7-445b-9b47-02c2c636cc14" >
+		<http:listener doc:name="Listener" doc:id="a68e2943-51a8-406a-8486-2974740376cb" config-ref="HTTP_Listener_config" path="/checkout" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="accountId" doc:id="a7efdafb-d8d9-4ca2-881b-d0b33523739e" variableName="accountId" />
+		<http:request method="GET" doc:name="getItemsFromCart" doc:id="eb242b93-7af4-46f0-b309-c30078ded931" path="/getCart" config-ref="HTTP_Request_configuration" responseTimeout="#[100000]">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.accountId
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="46e7cb1d-dc51-4c58-bdbe-5d893f260559" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Products__c: payload01.cart__c
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="GetBillAmount" doc:id="d1644250-d570-4c34-8ee6-8eadc809e1e0" name="getTotalAmount"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="09f58420-5ebd-4815-aa99-c0fd9bbfa156" variableName="amount"/>
+		<http:request method="GET" doc:name="Request" doc:id="5ddcccdb-df87-4996-a973-1d085f46e16b" config-ref="HTTP_Request_configuration" path="/getUserbyId">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.accountId
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="5371952e-5788-4964-85bd-da60cf0cc195" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	wishlist: payload01.wishlist,
+	BillingCity: payload01.BillingCity,
+	cart: "",
+	"type": payload01."type",
+	Name: payload01.Name,
+	Type: payload01.Type,
+	BillingCountry: payload01.BillingCountry,
+	Phone: payload01.Phone,
+	ShippingCountry: payload01.ShippingCountry,
+	ShippingState: payload01.ShippingState,
+	ShippingCity: payload01.ShippingCity,
+	Id: payload01.Id,
+	BillingState: payload01.BillingState,
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="879d7da8-8e41-4471-8df4-5b5333271598" config-ref="HTTP_Request_configuration" path="/updateUser" outputMimeType="application/json" sendBodyMode="ALWAYS"/>
+		<ee:transform doc:name="Transform Message" doc:id="abf56163-75f2-4102-87d8-1861559a5d06" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="26a069d9-bc02-4561-af54-d9fedd5494e6" />
+	</flow>
+	<flow name="getCart" doc:id="5ed11a96-7ac7-4dc6-8377-0eb79f4b5675" >
+		<http:listener doc:name="Listener" doc:id="2109996f-3579-4cbb-a06f-0a027c51db4b" config-ref="HTTP_Listener_config" path="/getCart" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="c47d37d8-56e4-46f6-846e-5f744cffe5c3" variableName="id"/>
+		<salesforce:query doc:name="Query" doc:id="b40002a1-e3c5-433d-a790-66da86e0ef47" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[SELECT cart__c,Id FROM ACCOUNT
+     ]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="dcbdefac-00d7-4b72-888a-0269ca0d16d1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.Id == vars.id)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ec83183c-cb7c-451c-a106-a98fcada80ea" message="#[payload]"/>
+	</flow>
+
+</mule>
