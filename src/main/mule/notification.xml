@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 	<flow name="notificationFlow" doc:id="3cf1cd56-f5d9-4faf-b72b-2302b502db26" >
 		<http:listener doc:name="Listener" doc:id="48c15bd1-07ae-43d0-80b0-ae6fda81dc5f" config-ref="HTTP_Listener_config" path="/notifyUser"/>
 		<set-variable value="#[payload[0]]" doc:name="Set Variable" doc:id="0a3ff4a0-f72e-45a1-ad2b-740cb961ebaa" variableName="code"/>
-		<flow-ref doc:name="Flow Reference" doc:id="e8f58cb4-9f65-4f74-a7af-34563ae16100" name="getUsers"/>
+		<flow-ref doc:name="GetUsersFlow" doc:id="e8f58cb4-9f65-4f74-a7af-34563ae16100" name="getUsers"/>
 		<foreach doc:name="For Each" doc:id="4158bdfc-eaf0-4188-a0c4-461c6f615566" >
 			<set-variable value="#[payload.Website]" doc:name="Set Variable" doc:id="86d32a09-610a-4564-a933-391bd34c6109" variableName="email"/>
 			<choice doc:name="Choice" doc:id="b2427d4d-0481-4f41-9587-c033bb6cea76" >
@@ -75,6 +75,6 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="1a656cd6-b3a4-43a6-ba0f-c18a58cf4d23" message="#[payload]"/>
 		<set-payload value="#[vars.code]" doc:name="Set Payload" doc:id="72bdc506-1aa7-49f8-a8b1-a24caa6e631f" />
-		<flow-ref doc:name="Flow Reference" doc:id="d646d69e-7cee-4ec5-841d-86fb6d5a77f6" name="notificationFlow"/>
+		<flow-ref doc:name="Notify User" doc:id="d646d69e-7cee-4ec5-841d-86fb6d5a77f6" name="notificationFlow"/>
 	</flow>
 </mule>

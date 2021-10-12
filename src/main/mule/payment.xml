@@ -1,17 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="abc244ec-1eee-447d-b043-3e1d1052f25c" >
 		<http:request-connection host="localhost" port="8081" />
 	</http:request-config>
+	<flow name="updateProduct" doc:id="4150b373-6ac4-4f60-80cf-42645a414644" >
+		<http:listener doc:name="Listener" doc:id="735a2ce8-6b92-4486-98d9-4f2cad9c404d" config-ref="HTTP_Listener_config" path="/updateProduct"/>
+		<ee:transform doc:name="Transform Message" doc:id="c6fad080-354a-429e-ac74-5c10746f06c6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Id: payload01.Id as String,
+	Name: payload01.Name,
+	ProductCode: payload01.ProductCode,
+	Price__c: payload01.Price__c,
+	stock__c: payload01.stock__c as Number
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update type="Product2" doc:name="Update" doc:id="704b5141-53d9-4d17-bdfd-2a3ea0fe4590" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="98a43117-d6a4-4878-868e-11e27808ad57" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7253e27a-53d7-46c4-82ab-4a519b66381a" />
+	</flow>
 	<flow name="getProductsById" doc:id="0dd3b717-aa19-41a3-8e9b-3cef2a4f5498" >
 		<http:listener doc:name="Listener" doc:id="e31b1482-854b-4c97-aab5-63a41c1960f7" config-ref="HTTP_Listener_config" path="/getProductById" />
 		<set-variable value="#[attributes.queryParams.id]" doc:name="Set id" doc:id="25599248-b013-4cc8-bb5a-34c76500bea1" variableName="id" />
@@ -26,10 +54,6 @@ output application/json
 payload filter ($.ProductCode == vars.id)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
-	<flow name="paymentFlow" doc:id="fde02e63-2ec7-49b1-80a9-822cf79032e4" >
-		<http:listener doc:name="Listener" doc:id="0c5624b2-3c4d-4589-a84a-ae2783587e13" config-ref="HTTP_Listener_config" path="/updateProduct"/>
-		<logger level="INFO" doc:name="Logger" doc:id="ab628898-f614-4081-9247-375b2d462fb5" />
 	</flow>
 	<flow name="updateByDelete" doc:id="28297566-5341-47f1-b82f-27f594271084" >
 		<http:listener doc:name="Listener" doc:id="729c19ed-f269-4345-9be3-3713637b0fea" config-ref="HTTP_Listener_config" path="/updateByDelete"/>
@@ -116,6 +140,25 @@ payload]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 			<set-variable value="#[payload.Price__c[0] as Number]" doc:name="price" doc:id="32b30a0e-9fe8-4ec0-a9eb-5ef79a2aea8d" variableName="try" mimeType="application/json" />
+			<ee:transform doc:name="Transform Message" doc:id="76f92ddc-50c4-4bd4-b473-14709aa5582c" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	stock__c: payload01.stock__c as Number -1,
+	ProductCode: payload01.ProductCode,
+	Price__c: payload01.Price__c,
+	Id: payload01.Id,
+	"type": payload01."type",
+	Name: payload01.Name
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[payload.stock__c]" doc:name="Set Variable" doc:id="9dfad7cf-0c1f-4b2e-b137-15c4ac91bd52" variableName="stock"/>
+			<logger level="INFO" doc:name="Logger" doc:id="1399b0c3-e29c-4a09-b400-5e8000a6a729" message="#[vars.stock]"/>
+			<flow-ref doc:name="Flow Reference" doc:id="5f6b7c2b-d941-451d-b490-874a67176971" name="updateProduct"/>
+			<logger level="INFO" doc:name="Logger" doc:id="5c2c3222-6bd1-4e33-8feb-0efc079730f7" message="#[payload]"/>
 			<ee:transform doc:name="sum" doc:id="5784ef18-8df3-4cae-a7da-a6e8222a4a65" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
@@ -126,6 +169,19 @@ vars.Amount + vars.try]]></ee:set-payload>
 			</ee:transform>
 			<set-variable value="#[payload]" doc:name="Set Variable" doc:id="183da24c-d69a-4820-a1dd-7431a9a250cc" variableName="Amount" />
 			<logger level="INFO" doc:name="Logger" doc:id="937bdd2d-6d75-4a8f-aea6-3db7b98e90ec" message="#[payload]" />
+			<choice doc:name="Choice" doc:id="46806df0-da70-4cab-bc25-208689f19f34" >
+				<when expression="#[vars.stock[0] as Number == 0]">
+					<logger level="INFO" doc:name="Logger" doc:id="fd2de450-d3c5-4dcd-9a23-429b2361be35" message="Stock finish"/>
+					<email:send doc:name="Copy_of_Send" doc:id="fa11a06e-838d-44c6-8382-80c6122fe92b" config-ref="Email_SMTP" fromAddress="poorna.velagam@apisero.com" subject="[Cart Items Updated]" >
+						<email:to-addresses >
+							<email:to-address value="vsaichandana@gmail.com" />
+						</email:to-addresses>
+						<email:body >
+							<email:content ><![CDATA[Items in your cart are out of stock at the moment!]]></email:content>
+						</email:body>
+					</email:send>
+				</when>
+			</choice>
 		</foreach>
 		<ee:transform doc:name="Transform Message" doc:id="2ac54c24-da61-4e98-b248-887be0cc66d9" >
 			<ee:message >

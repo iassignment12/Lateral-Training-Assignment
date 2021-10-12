@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_4150b373_6ac4_4f60_80cf_42645a414644_Input_Variables_try = Number
+
