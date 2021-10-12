@@ -16,7 +16,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 		<http:listener doc:name="Listener" doc:id="e31b1482-854b-4c97-aab5-63a41c1960f7" config-ref="HTTP_Listener_config" path="/getProductById" />
 		<set-variable value="#[attributes.queryParams.id]" doc:name="Set id" doc:id="25599248-b013-4cc8-bb5a-34c76500bea1" variableName="id" />
 		<salesforce:query doc:name="get Products from salesforce " doc:id="1e0af117-26e1-45b8-9ff2-8816da42eed3" config-ref="Salesforce_Config" >
-			<salesforce:salesforce-query ><![CDATA[SELECT Name, ProductCode, Price__c, stock__c from PRODUCT2]]></salesforce:salesforce-query>
+			<salesforce:salesforce-query ><![CDATA[SELECT Name, ProductCode, Price__c, stock__c,id from PRODUCT2]]></salesforce:salesforce-query>
 		</salesforce:query>
 		<ee:transform doc:name="print only product matching id" doc:id="1cbc9701-e3bb-4898-83e7-811cc67fae9b" >
 			<ee:message >
@@ -26,6 +26,54 @@ output application/json
 payload filter ($.ProductCode == vars.id)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</flow>
+	<flow name="updateByDelete" doc:id="28297566-5341-47f1-b82f-27f594271084" >
+		<http:listener doc:name="Listener" doc:id="729c19ed-f269-4345-9be3-3713637b0fea" config-ref="HTTP_Listener_config" path="/updateByDelete"/>
+		<ee:transform doc:name="Transform Message" doc:id="2d439c49-df74-4247-b8a3-ae0c0c2bc439" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="cf8af714-a1f5-4613-b642-976e37f35a3f" variableName="data"/>
+		<salesforce:delete doc:name="Delete" doc:id="537eb0a7-4810-46c0-8e1f-c6fe83e9ecb7" config-ref="Salesforce_Config">
+			<salesforce:ids ><![CDATA[#[payload.Id]]]></salesforce:ids>
+		</salesforce:delete>
+		<ee:transform doc:name="Transform Message" doc:id="86a75f90-8e41-45d5-9921-ea2c69370a9a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c1791be9-1651-4751-83fb-c8d620d8d639" message="#[payload]"/>
+		<set-payload value="#[vars.data]" doc:name="Set Payload" doc:id="1dbcf95b-c227-495f-b107-7743a915eeec" />
+		<ee:transform doc:name="Transform Message" doc:id="a9673fea-26f4-4d43-992b-8af98ebcc0ac">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	wishlist: payload01.wishlist,
+	BillingCity: payload01.BillingCity,
+	cart: payload01.cart,
+	"type": payload01."type",
+	Name: payload01.Name,
+	Type: payload01.Type,
+	BillingCountry: payload01.BillingCountry,
+	Phone: payload01.Phone,
+	ShippingCountry: payload01.ShippingCountry,
+	ShippingState: payload01.ShippingState,
+	ShippingCity: payload01.ShippingCity,
+	BillingState: payload01.BillingState
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="02f6d0dd-c9a6-4126-8140-edbe0cdda3b2" message="#[payload]"/>
+		<flow-ref doc:name="Flow Reference" doc:id="15b36f3f-3c8a-4228-8108-6be985d9c858" name="postUser"/>
 	</flow>
 	<flow name="getTotalAmount" doc:id="0b10c089-70af-42a4-a112-04604a2b89f7" >
 		<http:listener doc:name="Listener" doc:id="7766ac1a-c857-4016-8304-a7ae68f29b1a" config-ref="HTTP_Listener_config" path="/getTotalAmountFromProducts" />
@@ -107,13 +155,14 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 		</ee:transform>
 		<flow-ref doc:name="GetBillAmount" doc:id="d1644250-d570-4c34-8ee6-8eadc809e1e0" name="getTotalAmount"/>
 		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="09f58420-5ebd-4815-aa99-c0fd9bbfa156" variableName="amount"/>
-		<http:request method="GET" doc:name="Request" doc:id="5ddcccdb-df87-4996-a973-1d085f46e16b" config-ref="HTTP_Request_configuration" path="/getUserbyId">
+		<http:request method="GET" doc:name="GetUserDataById" doc:id="5ddcccdb-df87-4996-a973-1d085f46e16b" config-ref="HTTP_Request_configuration" path="/getUserbyId" responseTimeout="#[100000]">
 			<http:query-params ><![CDATA[#[output application/java
 ---
 {
 	"id" : vars.accountId
 }]]]></http:query-params>
 		</http:request>
+		<set-variable value="#[payload.cart__c]" doc:name="Set Variable" doc:id="b7a416fb-7244-4806-975d-47325127f823" variableName="Products" />
 		<ee:transform doc:name="Transform Message" doc:id="5371952e-5788-4964-85bd-da60cf0cc195" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -136,7 +185,8 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="GET" doc:name="Request" doc:id="879d7da8-8e41-4471-8df4-5b5333271598" config-ref="HTTP_Request_configuration" path="/updateUser" outputMimeType="application/json" sendBodyMode="ALWAYS"/>
+		<http:request method="GET" doc:name="Clear Cart" doc:id="879d7da8-8e41-4471-8df4-5b5333271598" config-ref="HTTP_Request_configuration" path="/updateByDelete" outputMimeType="application/json" sendBodyMode="ALWAYS" responseTimeout="#[5000000]"/>
+		<set-variable value="#[payload.items.id]" doc:name="Set Variable" doc:id="cfc3b4d6-360d-40f0-a0f1-48a81714ce63" variableName="AccountId"/>
 		<ee:transform doc:name="Transform Message" doc:id="abf56163-75f2-4102-87d8-1861559a5d06" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -146,6 +196,36 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="26a069d9-bc02-4561-af54-d9fedd5494e6" />
+		<ee:transform doc:name="Transform Message" doc:id="9f83f5ab-b2cf-4d05-b031-3500c1b1495f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"AccountId" : vars.accountId,
+	"Status" : "Draft",
+	"Product__c" : vars.Products,
+	"EffectiveDate" : "2021-10-05",
+	"TotalAmount" : vars.amount
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="4b6a099c-b1f1-4c4e-a8c7-6283511fe545" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	Status: payload.Status,
+	Products__c: payload.Product__c[0] as String,
+	AccountId: payload.AccountId[0] as String,
+	TotalAmount: payload.TotalAmount as String,
+	EffectiveDate: payload.EffectiveDate
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="ad28b65d-40f5-4e0d-9501-ff5aa4d9ba7d" />
+		<flow-ref doc:name="Flow Reference" doc:id="4bd3d93d-8cf9-4389-9595-d573f2c3a17b" name="postOrder"/>
 	</flow>
 	<flow name="getCart" doc:id="5ed11a96-7ac7-4dc6-8377-0eb79f4b5675" >
 		<http:listener doc:name="Listener" doc:id="2109996f-3579-4cbb-a06f-0a027c51db4b" config-ref="HTTP_Listener_config" path="/getCart" />

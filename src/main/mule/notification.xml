@@ -1,11 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="fedb9b6a-3890-4320-84b1-ef1af5e1b60c" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="poorna.velagam@apisero.com" password="uqwleleeasxsomdk" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<flow name="notificationFlow" doc:id="3cf1cd56-f5d9-4faf-b72b-2302b502db26" >
+		<http:listener doc:name="Listener" doc:id="48c15bd1-07ae-43d0-80b0-ae6fda81dc5f" config-ref="HTTP_Listener_config" path="/notifyUser"/>
+		<set-variable value="#[payload[0]]" doc:name="Set Variable" doc:id="0a3ff4a0-f72e-45a1-ad2b-740cb961ebaa" variableName="code"/>
+		<flow-ref doc:name="Flow Reference" doc:id="e8f58cb4-9f65-4f74-a7af-34563ae16100" name="getUsers"/>
+		<foreach doc:name="For Each" doc:id="4158bdfc-eaf0-4188-a0c4-461c6f615566" >
+			<set-variable value="#[payload.Website]" doc:name="Set Variable" doc:id="86d32a09-610a-4564-a933-391bd34c6109" variableName="email"/>
+			<choice doc:name="Choice" doc:id="b2427d4d-0481-4f41-9587-c033bb6cea76" >
+				<when expression="#[payload.cart__c contains vars.code]">
+					<ee:transform doc:name="Transform Message" doc:id="0ebae2aa-365f-417b-942d-7d40ba5f1768" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message" : "Product in cart"
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="2b514de0-1836-4735-8140-cd86eb2efaa9" message="#[payload]"/>
+					<logger level="INFO" doc:name="Logger" doc:id="0e9f8a3c-13a3-4a59-bef5-8c6650c92d3e" message="#[vars.email]"/>
+					<email:send doc:name="Send" doc:id="64ee6216-0af9-408d-81aa-abad2f081230" config-ref="Email_SMTP" fromAddress="poorna.velagam@apisero.com" subject="[Cart Items Updated]">
+						<email:to-addresses >
+							<email:to-address value="vsaichandana@gmail.com" />
+						</email:to-addresses>
+						<email:body >
+							<email:content ><![CDATA[Cart items have been updated. Please re-validate before checkout]]></email:content>
+						</email:body>
+					</email:send>
+				</when>
+			</choice>
+		</foreach>
+	</flow>
 	<flow name="updateItem" doc:id="f2d5d119-7f64-4e07-b8d6-a75329cb12cc" >
 		<http:listener doc:name="Listener" doc:id="44515f11-d0d9-4b4c-99dd-3f5272583966" config-ref="HTTP_Listener_config" path="/updateItem" allowedMethods="POST"/>
 		<ee:transform doc:name="Transform Message" doc:id="0234d512-5c96-420e-b97a-2e4503314e6a" >
@@ -14,6 +54,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 output application/java
 ---
 payload map ( payload01 , indexOfPayload01 ) -> {
+	Id: payload01.Id as String,
 	Name: payload01.Name,
 	ProductCode: payload01.ProductCode,
 	Price__c: payload01.Price__c,
@@ -21,7 +62,8 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="17978b1d-15fb-4111-be9b-3efa28f2f143" />
+		<set-variable value="#[payload.ProductCode]" doc:name="Set Variable" doc:id="3bc01ee4-11ef-4e63-a001-63ff62a4ec27" variableName="code"/>
+		<logger level="INFO" doc:name="Logger" doc:id="17978b1d-15fb-4111-be9b-3efa28f2f143" message="#[payload]"/>
 		<salesforce:update doc:name="Update" doc:id="63cffd12-b880-4846-b633-3b4d99e03588" config-ref="Salesforce_Config" type="Product2"/>
 		<ee:transform doc:name="Transform Message" doc:id="1b14ae00-bb59-4bd6-8a1c-f65e2bf365db" >
 			<ee:message >
@@ -32,5 +74,7 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="1a656cd6-b3a4-43a6-ba0f-c18a58cf4d23" message="#[payload]"/>
+		<set-payload value="#[vars.code]" doc:name="Set Payload" doc:id="72bdc506-1aa7-49f8-a8b1-a24caa6e631f" />
+		<flow-ref doc:name="Flow Reference" doc:id="d646d69e-7cee-4ec5-841d-86fb6d5a77f6" name="notificationFlow"/>
 	</flow>
 </mule>

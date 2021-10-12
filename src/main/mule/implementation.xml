@@ -65,7 +65,7 @@ payload filter ($.Id == vars.id)]]></ee:set-payload>
      ShippingCity,
      Id,
      type,
-     BillingState,
+     BillingState,Website,
      Name FROM ACCOUNT]]></salesforce:salesforce-query>
 		</salesforce:query>
 		<ee:transform doc:name="Transform Message"
@@ -234,10 +234,8 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 	AccountId: payload01.AccountId,
 	EffectiveDate: payload01.EffectiveDate as Date,
 	Status: payload01.Status,
-	Type: payload01."type",
-	Name: payload01.Name as String,
-	OrderNumber: payload01.OrderNumber,
-	Products__c: payload01.Products__c
+	Products__c: payload01.Products__c,
+	Bill__c: payload01.TotalAmount
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
