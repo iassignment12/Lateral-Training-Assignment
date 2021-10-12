@@ -27,6 +27,10 @@ payload filter ($.ProductCode == vars.id)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="paymentFlow" doc:id="fde02e63-2ec7-49b1-80a9-822cf79032e4" >
+		<http:listener doc:name="Listener" doc:id="0c5624b2-3c4d-4589-a84a-ae2783587e13" config-ref="HTTP_Listener_config" path="/updateProduct"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ab628898-f614-4081-9247-375b2d462fb5" />
+	</flow>
 	<flow name="updateByDelete" doc:id="28297566-5341-47f1-b82f-27f594271084" >
 		<http:listener doc:name="Listener" doc:id="729c19ed-f269-4345-9be3-3713637b0fea" config-ref="HTTP_Listener_config" path="/updateByDelete"/>
 		<ee:transform doc:name="Transform Message" doc:id="2d439c49-df74-4247-b8a3-ae0c0c2bc439" >

@@ -1,0 +1,30 @@
+[
+  {
+    "Account name": "ChandanaVelagam",
+    "First name": "Chandana",
+    "Last name": "Velagam",
+    "Phone": "1234567890",
+    "Billing city": "Guntur",
+    "Billing state/province": "Andhra Pradesh",
+    "Billing country": "India",
+    "Billing zip/postal code": "522004",
+    "Shipping city": "Guntur",
+    "Shipping state/province": "Andhra Pradesh",
+    "Shipping country": "India",
+    "Shipping zip/postal code": "522001"
+  },
+  {
+    "Account name": "Testval0",
+    "First name": "Testval1",
+    "Last name": "Testval2",
+    "Phone": "Testval",
+    "Billing city": "Testval",
+    "Billing state/province": "Testval",
+    "Billing country": "Testval",
+    "Billing zip/postal code": "Testval",
+    "Shipping city": "Testval",
+    "Shipping state/province": "Testval",
+    "Shipping country": "Testval",
+    "Shipping zip/postal code": "Testval"
+  }
+]

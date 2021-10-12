@@ -18,6 +18,186 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<munit-tools:assert doc:name="Assert expression" doc:id="395fc94f-0a8f-4cf9-b649-fe835e35d2da" />
 		</munit:validation>
 	</munit:test>
+	<munit:test name="implementation-test-suite-postUserTest" doc:id="72defd33-baa1-4464-906f-c544f0a2b95c" description="Test">
+		<munit:execution >
+			<ee:transform doc:name="Transform Message" doc:id="209203e6-4b53-4c80-9ffc-93a8545b07e4" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+var myInputExample = {
+	"user": {
+		"wishlist__c": "GC5020,GC3040",
+		"BillingCity": "Guntur",
+		"cart__c": "",
+		"Website": "vsaichandana@gmail.com",
+		"type": "Account",
+		"Name": "Chinni",
+		"Type": "ABC",
+		"BillingCountry": "India",
+		"Phone": "1234567890",
+		"ShippingCountry": "India",
+		"ShippingState": "Andhra Pradesh",
+		"ShippingCity": "Guntur",
+		"BillingState": "Andhra Pradesh"
+	}
+}
+output application/json
+---
+ myInputExample.*user map(item,index) -> {
+	"wishlist__c": item.wishlist__c,
+	"BillingCity": item.BillingCity,
+	"cart__c": item.cart__c,
+	"Website": item.Website,
+	"type": item."type",
+	"Name": item.Name,
+	"Type": item.Type,
+	"BillingCountry": item.BillingCountry,
+	"Phone": item.Phone,
+	"ShippingCountry": item.ShippingCountry,
+	"ShippingState": item.ShippingState,
+	"ShippingCity": item.ShippingCity,
+	"BillingState": item.BillingState
+}
+]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="0120ad69-4f0c-4c60-81b9-cde6385e0cbc" mimeType="application/json"/>
+			<flow-ref doc:name="Flow-ref to postUser" doc:id="b5a9a355-1e38-4ac1-b5a1-793ccb683dfa" name="postUser"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="dbadb901-41d5-4322-90ef-79cb315a5288" actual="#[payload.successful]" expected="#[true]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-updateUsersTest" doc:id="e17001e9-e51e-4fee-8792-9620dd60d16e" description="Test">
+		<munit:execution >
+			<ee:transform doc:name="Transform Message" doc:id="42afc366-8ac9-48d0-a753-9ea49b3843a5">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+var myInputExample = {
+	"user": {
+		"wishlist__c": null,
+		"BillingCity": "Testval3",
+		"cart__c": null,
+		"Website": null,
+		"type": "Account",
+		"Name": "PoornaSaiChandana",
+		"Type": null,
+		"BillingCountry": "Testval3",
+		"Phone": "9948203275",
+		"ShippingCountry": "Testval3",
+		"ShippingState": "Testval2",
+		"ShippingCity": "Testval12",
+		"Id": "0015g00000TljgrAAB",
+		"BillingState": "Testval13"
+	}
+}
+output application/json
+---
+myInputExample.*user map(item,index) -> {
+	"wishlist__c": item.wishlist__c,
+	"BillingCity": item.BillingCity,
+	"cart__c": item.cart__c,
+	"Website": item.Website,
+	"type": item."type",
+	"Name": item.Name,
+	"Type": item.Type,
+	"BillingCountry": item.BillingCountry,
+	"Phone": item.Phone,
+	"ShippingCountry": item.ShippingCountry,
+	"ShippingState": item.ShippingState,
+	"ShippingCity": item.ShippingCity,
+	"BillingState": item.BillingState,
+	"Id" : item.Id
+}
+]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="622dc45b-3599-4e84-b56c-602f9893520a" mimeType="application/json" />
+			<flow-ref doc:name="Flow-ref to updateUsers" doc:id="7da10523-e282-4f75-946c-d8ed58bbc0d2" name="updateUsers" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="a06564b8-da4f-470c-aa25-49e476dc246a" actual="#[payload.successful]" expected="#[true]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getOrderTest" doc:id="8bb56e32-286c-460e-8167-0cbf1863c21d" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getOrder" doc:id="f4fdac7d-3504-4dd5-a1c4-5476af6b31b9" name="getOrder"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="b9ac86a6-2744-4697-a7f5-4a6ba41b563e" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-postOrderTest" doc:id="feeb7ea1-0058-4399-8c10-6e27ccf52fe8" description="Test">
+		<munit:execution >
+			<ee:transform doc:name="Transform Message" doc:id="4b4ee2e6-21b1-452c-88f4-159e5e67e5ce" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+var myInputExample = {
+	"order": {
+		"AccountId": "0015g00000TljgrAAB",
+		"Status": "Draft",
+		"Product__c": "GC5020,GC3040",
+		"EffectiveDate": "2021-10-05"
+	}
+}
+output application/json
+---
+myInputExample.*order map(item,index) -> {
+	"AccountId": item.AccountId,
+	"Status": item.Status,
+	"Product__c": item.Product__c,
+	"EffectiveDate": item.EffectiveDate
+}
+]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="b84131e2-4159-4850-96e5-1e020711722e" mimeType="application/json" />
+			<flow-ref doc:name="Flow-ref to postOrder" doc:id="622fec4f-9da5-4914-b0a3-1609ab12835d" name="postOrder" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="b8ca2011-e35b-4fca-819e-9d71a8a5ee10" actual="#[payload.successful]" expected="#[true]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-updateOrdersTest" doc:id="f7336691-9b8e-431a-8d11-af79a2395a89" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to updateOrders" doc:id="ced39e3b-9ed4-4504-83eb-f1d0e8da59d8" name="updateOrders"/>
+			<ee:transform doc:name="Copy_of_Transform Message" doc:id="f20ca87c-9ecd-4d52-913a-4c6f3b4a2ecb" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+var myInputExample = {
+	"order": {
+		"Status": "Draft",
+		"Products__c": "1223",
+		"AccountId": "0015g00000NzyLtAAJ",
+		"OrderNumber": "00000104",
+		"Id": null,
+		"TotalAmount": "0.0",
+		"type1": "Order",
+		"Name": "AB1C",
+		"EffectiveDate": "2021-10-05"
+	}
+}
+output application/json
+---
+myInputExample.*order map(item,index) -> {
+	"Status": item.Status,
+	"Products__c": item.Products__c,
+	"AccountId": item.AccountId,
+	"OrderNumber": item.OrderNumber,
+	"Id": item.Id,
+	"type" : item.type1,
+	"TotalAmount": item.TotalAmount,
+	"Name": item.Name,
+	"EffectiveDate": item.EffectiveDate
+}
+]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-payload value="#[payload]" doc:name="Copy_of_Set Payload" doc:id="2d30d980-08e0-4487-97c5-144d5496f420" mimeType="application/json" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="11a64666-ab98-43b0-a626-353999df4411" actual="#[payload.successful]" expected="#[true]"/>
+		</munit:validation>
+	</munit:test>
 
 
 </mule>

@@ -593,6 +593,20 @@ type auto_3cf1cd56_f5d9_4faf_b72b_2302b502db26_Output_Variables_code = Any
 
 ]]></types:shape>
     </types:type>
+    <types:type name="user" format="json">
+      <types:shape format="weave" example="examples/accounts-1.json"><![CDATA[%dw 2.0
+
+type user = Array<{|  "Account name": String,   "First name": String,   "Last name": String,   Phone: String,   "Billing city": String,   "Billing state/province": String,   "Billing country": String,   "Billing zip/postal code": String,   "Shipping city": String,   "Shipping state/province": String,   "Shipping country": String,   "Shipping zip/postal code": String|}> {"example": "[{\\\"Account name\\\":\\\"ChandanaVelagam\\\",\\\"First name\\\":\\\"Chandana\\\",\\\"Last name\\\":\\\"Velagam\\\",\\\"Phone\\\":\\\"1234567890\\\",\\\"Billing city\\\":\\\"Guntur\\\",\\\"Billing state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Billing country\\\":\\\"India\\\",\\\"Billing zip\\/postal code\\\":\\\"522004\\\",\\\"Shipping city\\\":\\\"Guntur\\\",\\\"Shipping state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Shipping country\\\":\\\"India\\\",\\\"Shipping zip\\/postal code\\\":\\\"522001\\\"},{\\\"Account name\\\":\\\"Testval0\\\",\\\"First name\\\":\\\"Testval1\\\",\\\"Last name\\\":\\\"Testval2\\\",\\\"Phone\\\":\\\"Testval\\\",\\\"Billing city\\\":\\\"Testval\\\",\\\"Billing state\\/province\\\":\\\"Testval\\\",\\\"Billing country\\\":\\\"Testval\\\",\\\"Billing zip\\/postal code\\\":\\\"Testval\\\",\\\"Shipping city\\\":\\\"Testval\\\",\\\"Shipping state\\/province\\\":\\\"Testval\\\",\\\"Shipping country\\\":\\\"Testval\\\",\\\"Shipping zip\\/postal code\\\":\\\"Testval\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="user123" format="json">
+      <types:shape format="weave" example="examples/accounts-2.json"><![CDATA[%dw 2.0
+
+type user123 = Array<{|  "Account name": String,   "First name": String,   "Last name": String,   Phone: String,   "Billing city": String,   "Billing state/province": String,   "Billing country": String,   "Billing zip/postal code": String,   "Shipping city": String,   "Shipping state/province": String,   "Shipping country": String,   "Shipping zip/postal code": String|}> {"example": "[{\\\"Account name\\\":\\\"ChandanaVelagam\\\",\\\"First name\\\":\\\"Chandana\\\",\\\"Last name\\\":\\\"Velagam\\\",\\\"Phone\\\":\\\"1234567890\\\",\\\"Billing city\\\":\\\"Guntur\\\",\\\"Billing state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Billing country\\\":\\\"India\\\",\\\"Billing zip\\/postal code\\\":\\\"522004\\\",\\\"Shipping city\\\":\\\"Guntur\\\",\\\"Shipping state\\/province\\\":\\\"Andhra Pradesh\\\",\\\"Shipping country\\\":\\\"India\\\",\\\"Shipping zip\\/postal code\\\":\\\"522001\\\"},{\\\"Account name\\\":\\\"Testval0\\\",\\\"First name\\\":\\\"Testval1\\\",\\\"Last name\\\":\\\"Testval2\\\",\\\"Phone\\\":\\\"Testval\\\",\\\"Billing city\\\":\\\"Testval\\\",\\\"Billing state\\/province\\\":\\\"Testval\\\",\\\"Billing country\\\":\\\"Testval\\\",\\\"Billing zip\\/postal code\\\":\\\"Testval\\\",\\\"Shipping city\\\":\\\"Testval\\\",\\\"Shipping state\\/province\\\":\\\"Testval\\\",\\\"Shipping country\\\":\\\"Testval\\\",\\\"Shipping zip\\/postal code\\\":\\\"Testval\\\"}]"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#378b4de3-6063-4048-a73f-c675137625aa">
     <types:processor-declaration>
@@ -936,6 +950,38 @@ type auto_3cf1cd56_f5d9_4faf_b72b_2302b502db26_Output_Variables_code = Any
       <types:output-event>
         <types:message>
           <types:payload type="orders"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#30c27800-5a8f-4847-92a1-61ebb5104bce">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="accounts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#49466952-080f-478a-a11e-f06017d47ff9">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="accounts"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#209203e6-4b53-4c80-9ffc-93a8545b07e4">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="user"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="accounts"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
